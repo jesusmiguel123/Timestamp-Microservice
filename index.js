@@ -23,26 +23,29 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-app.get("/api/:time", (req, res) => {
+app.get("/api/:time?", (req, res) => {
   const { time } = req.params;
   let unix, utc;
-  if(/^[0-9]+$/.test(time)){
+  if(time == undefined){
+    let date = new Date();
+    unix = date.getTime();
+    utc = date.toUTCString();
+  } else if(/^[0-9]+$/.test(time)){
     unix = time;
     utc = new Date(Number(time)).toUTCString()
   } else {
     let date = new Date(time);
+    if(date.toString() === "Invalid Date" ){
+      res.json({error: date.toString()});
+      return;
+    }
     unix = date.getTime();
     utc = date.toUTCString();
   }
   res.json({
-    "unix": unix,
-    "utc": utc
+    unix: Number(unix),
+    utc: utc
   });
-});
-
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
 });
 
 const PORT = process.env.PORT ?? 3000;
